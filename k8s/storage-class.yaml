@@ -1,0 +1,112 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-storage
+  labels:
+    app: discord-claude
+    component: storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# NFS Provisioner用のServiceAccount（動的プロビジョニングを使用する場合）
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfs-provisioner
+  namespace: discord-claude
+  labels:
+    app: nfs-provisioner
+    component: discord-claude
+
+---
+# NFS Provisioner用のClusterRole（動的プロビジョニングを使用する場合）
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nfs-provisioner
+  labels:
+    app: nfs-provisioner
+    component: discord-claude
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "update", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nfs-provisioner
+  labels:
+    app: nfs-provisioner
+    component: discord-claude
+subjects:
+- kind: ServiceAccount
+  name: nfs-provisioner
+  namespace: discord-claude
+roleRef:
+  kind: ClusterRole
+  name: nfs-provisioner
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# NFS Subdir External Provisioner（動的プロビジョニングを使用する場合）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-subdir-external-provisioner
+  namespace: discord-claude
+  labels:
+    app: nfs-subdir-external-provisioner
+    component: discord-claude
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-subdir-external-provisioner
+  template:
+    metadata:
+      labels:
+        app: nfs-subdir-external-provisioner
+        component: discord-claude
+    spec:
+      serviceAccountName: nfs-provisioner
+      containers:
+      - name: nfs-subdir-external-provisioner
+        image: k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+        volumeMounts:
+        - name: nfs-subdir-external-provisioner-root
+          mountPath: /persistentvolumes
+        env:
+        - name: PROVISIONER_NAME
+          value: kubernetes.io/nfs-subdir
+        - name: NFS_SERVER
+          value: 192.168.1.100  # NFSサーバーのIPアドレスに置き換えてください
+        - name: NFS_PATH
+          value: /nfs           # NFSサーバーのルートパスに置き換えてください
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      volumes:
+      - name: nfs-subdir-external-provisioner-root
+        nfs:
+          server: 192.168.1.100  # NFSサーバーのIPアドレスに置き換えてください
+          path: /nfs             # NFSサーバーのルートパスに置き換えてください

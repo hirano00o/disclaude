@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: discord-claude
+  namespace: discord-claude
+
+# 名前空間の指定
+namespace: discord-claude
+
+# リソースの適用順序を管理
+resources:
+  # 1. 名前空間とストレージクラス
+  - namespace.yaml
+  - storage-class.yaml
+  
+  # 2. 設定とシークレット
+  - configmap.yaml
+  - secret.yaml
+  
+  # 3. RBAC
+  - rbac.yaml
+  
+  # 4. PostgreSQL（ストレージ依存）
+  - postgresql.yaml
+  
+  # 5. スキーマ初期化（PostgreSQL依存）
+  - init-schema.yaml
+  
+  # 6. アプリケーション（PostgreSQL依存）
+  - deployment.yaml
+  - service.yaml
+
+# 共通ラベルの追加
+commonLabels:
+  app.kubernetes.io/name: discord-claude
+  app.kubernetes.io/version: "v1.0.0"
+  app.kubernetes.io/component: discord-bot
+
+# 共通アノテーションの追加
+commonAnnotations:
+  app.kubernetes.io/managed-by: kustomize
+
+# イメージのタグを管理
+images:
+  - name: discord-claude
+    newTag: latest
+
+# 設定の変更（例：レプリカ数）
+patchesStrategicMerge:
+  - replica-patch.yaml
+
+# リソース制限の設定
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: discord-claude-bot
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi

@@ -59,6 +59,14 @@ Discord User → Discord → Discord Bot (Kubernetes) → Claude Code Sandbox (K
 
 ## 🛠️ セットアップ
 
+### Kubernetes環境での運用
+
+本システムはKubernetes環境での本格運用を想定しています。PostgreSQLもKubernetesクラスター内で動作し、NFSによるデータ永続化を行います。
+
+### ローカル開発環境
+
+ローカル開発時は、PostgreSQLをDockerで起動し、Botのみローカルで実行することも可能です。
+
 ### 1. 事前準備
 
 ```bash
@@ -101,25 +109,38 @@ MAX_SANDBOXES=3
 ### 4. データベースの準備
 
 ```bash
-# PostgreSQLの起動
+# Kubernetes環境の場合：
+# PostgreSQLはKubernetesクラスター内で自動的にデプロイされます
+
+# ローカル開発環境の場合：
 docker run -d \
   --name discord-claude-db \
   -e POSTGRES_USER=discord_claude \
   -e POSTGRES_PASSWORD=your_password \
   -e POSTGRES_DB=discord_claude \
   -p 5432:5432 \
-  postgres:13
+  postgres:15
 
-# マイグレーションの実行
+# マイグレーションの実行（ローカル開発時）
 go run cmd/main.go
 ```
 
-### 5. Kubernetesデプロイ
+### 5. NFSサーバーの設定
 
 ```bash
-# 名前空間の作成
-kubectl apply -f k8s/namespace.yaml
+# NFSサーバーの設定（事前に準備）
+# 以下のファイルでNFSサーバーの情報を更新してください：
+# - k8s/postgresql.yaml: NFS サーバーIP とパス
+# - k8s/storage-class.yaml: NFS サーバーIP とパス
 
+# 例：
+# server: 192.168.1.100
+# path: /nfs/postgresql
+```
+
+### 6. Kubernetesデプロイ
+
+```bash
 # シークレットの作成（base64エンコードが必要）
 echo -n "your_discord_token" | base64  # Discord Token
 echo -n "your_db_password" | base64    # DB Password
@@ -128,14 +149,17 @@ echo -n "your_claude_api_key" | base64 # Claude API Key
 # シークレットファイルを編集してエンコード済みの値を設定
 vim k8s/secret.yaml
 
-# 設定ファイルを編集
+# 設定ファイルを編集（Discord Guild ID など）
 vim k8s/configmap.yaml
 
-# デプロイ
-kubectl apply -f k8s/
+# 自動デプロイスクリプトの実行
+./scripts/deploy.sh
+
+# または手動デプロイ
+kubectl apply -k k8s/
 ```
 
-### 6. Dockerイメージのビルド
+### 7. Dockerイメージのビルド
 
 ```bash
 # Dockerfileの作成
@@ -269,7 +293,15 @@ discord-claude/
 │   ├── service.yaml
 │   ├── configmap.yaml
 │   ├── secret.yaml
-│   └── rbac.yaml
+│   ├── rbac.yaml
+│   ├── postgresql.yaml         # PostgreSQL設定
+│   ├── storage-class.yaml      # NFS StorageClass
+│   ├── init-schema.yaml        # DB初期化
+│   ├── kustomization.yaml      # Kustomize設定
+│   └── replica-patch.yaml      # レプリカ設定
+├── scripts/
+│   ├── deploy.sh               # デプロイスクリプト
+│   └── cleanup.sh              # クリーンアップスクリプト
 ├── sql/
 │   └── schema.sql              # データベーススキーマ
 ├── go.mod
@@ -289,9 +321,10 @@ discord-claude/
 
 ### 制限事項
 
-- ファイルは一時的（セッション終了時に削除）
-- 同時実行サンドボックス数に制限あり
+- サンドボックス内のファイルは一時的（セッション終了時に削除）
+- 同時実行サンドボックス数に制限あり（デフォルト3つ）
 - リソース使用量の制限あり
+- PostgreSQLデータは永続化されるが、適切なバックアップが必要
 
 ### パフォーマンス
 
@@ -316,3 +349,22 @@ discord-claude/
 - 問題や質問は[Issues](https://github.com/your-repo/discord-claude/issues)で報告
 - ドキュメントは[CLAUDE.md](CLAUDE.md)を参照
 - 開発者向け情報は各パッケージのコメントを参照
+
+## 🚀 運用コマンド
+
+```bash
+# デプロイ
+./scripts/deploy.sh
+
+# クリーンアップ
+./scripts/cleanup.sh
+
+# ログ確認
+kubectl logs -l app=discord-claude-bot -n discord-claude -f
+
+# データベース接続
+kubectl exec -it deployment/postgresql -n discord-claude -- psql -U discord_claude -d discord_claude
+
+# システム状態確認
+kubectl get pods,svc,pvc -n discord-claude
+```

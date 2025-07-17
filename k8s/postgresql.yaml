@@ -1,0 +1,203 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-pv
+  labels:
+    app: postgresql
+    component: discord-claude
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-storage
+  nfs:
+    server: 192.168.1.100  # NFSサーバーのIPアドレスに置き換えてください
+    path: /nfs/postgresql   # NFSサーバーのパスに置き換えてください
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+  namespace: discord-claude
+  labels:
+    app: postgresql
+    component: discord-claude
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-storage
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: discord-claude
+  labels:
+    app: postgresql
+    component: discord-claude
+spec:
+  selector:
+    app: postgresql
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: discord-claude
+  labels:
+    app: postgresql
+    component: discord-claude
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # PostgreSQLはReadWriteOnceのため
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+        component: discord-claude
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-name
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: discord-claude-secrets
+              key: db-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgresql-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: postgresql-storage
+        persistentVolumeClaim:
+          claimName: postgresql-pvc
+      restartPolicy: Always
+
+---
+# PostgreSQL初期化用のInitContainer設定（オプション）
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgresql-init
+  namespace: discord-claude
+  labels:
+    app: postgresql-init
+    component: discord-claude
+spec:
+  template:
+    metadata:
+      labels:
+        app: postgresql-init
+        component: discord-claude
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: postgresql-init
+        image: postgres:15-alpine
+        env:
+        - name: PGHOST
+          value: postgresql
+        - name: PGPORT
+          value: "5432"
+        - name: PGUSER
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-user
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: discord-claude-secrets
+              key: db-password
+        - name: PGDATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-name
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # PostgreSQLが起動するまで待機
+          until pg_isready -h $PGHOST -p $PGPORT -U $PGUSER; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
+          
+          echo "PostgreSQL is ready. Initializing database..."
+          
+          # スキーマファイルをダウンロード（またはConfigMapから読み込み）
+          # 実際の運用では、InitContainerでスキーマを適用
+          psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+            SELECT 'Database initialization completed' AS status;
+          "
+          
+          echo "Database initialization completed."
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

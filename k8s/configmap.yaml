@@ -11,7 +11,7 @@ data:
   discord-guild-id: ""  # 実際のGuild IDを設定
   
   # データベース設定
-  db-host: "postgresql"
+  db-host: "postgresql.discord-claude.svc.cluster.local"
   db-port: "5432"
   db-user: "discord_claude"
   db-name: "discord_claude"
