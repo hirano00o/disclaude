@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"discord-claude/internal/auth"
-	"discord-claude/internal/config"
-	"discord-claude/internal/db"
-	"discord-claude/internal/k8s"
+	"disclaude/internal/auth"
+	"disclaude/internal/config"
+	"disclaude/internal/db"
+	"disclaude/internal/k8s"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"

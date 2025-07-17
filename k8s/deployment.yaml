@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: discord-claude-bot
-  namespace: discord-claude
+  name: disclaude-bot
+  namespace: disclaude
   labels:
-    app: discord-claude-bot
-    component: discord-claude
+    app: disclaude-bot
+    component: disclaude
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: discord-claude-bot
+      app: disclaude-bot
   template:
     metadata:
       labels:
-        app: discord-claude-bot
-        component: discord-claude
+        app: disclaude-bot
+        component: disclaude
     spec:
-      serviceAccountName: discord-claude-bot
+      serviceAccountName: disclaude-bot
       containers:
-      - name: discord-claude-bot
-        image: discord-claude:latest
+      - name: disclaude-bot
+        image: disclaude:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -29,49 +29,49 @@ spec:
         - name: DISCORD_TOKEN
           valueFrom:
             secretKeyRef:
-              name: discord-claude-secrets
+              name: disclaude-secrets
               key: discord-token
         - name: DISCORD_GUILD_ID
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: discord-guild-id
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-host
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-port
         - name: DB_USER
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-user
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: discord-claude-secrets
+              name: disclaude-secrets
               key: db-password
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-name
         - name: KUBERNETES_NAMESPACE
-          value: "discord-claude"
+          value: "disclaude"
         - name: MAX_SANDBOXES
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: max-sandboxes
         - name: CLAUDE_API_KEY
           valueFrom:
             secretKeyRef:
-              name: discord-claude-secrets
+              name: disclaude-secrets
               key: claude-api-key
         - name: CLAUDE_CONFIG_PATH
           value: "/home/user/.claude"
@@ -101,6 +101,6 @@ spec:
       volumes:
       - name: kubeconfig
         secret:
-          secretName: discord-claude-kubeconfig
+          secretName: disclaude-kubeconfig
           optional: true
       restartPolicy: Always

@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: discord-claude-bot
-  namespace: discord-claude
+  name: disclaude-bot
+  namespace: disclaude
 spec:
   replicas: 1  # Discord Botは通常1つのレプリカで十分
 
@@ -11,6 +11,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgresql
-  namespace: discord-claude
+  namespace: disclaude
 spec:
   replicas: 1  # PostgreSQLは単一インスタンス（ReadWriteOnceのため）

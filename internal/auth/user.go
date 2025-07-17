@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"discord-claude/internal/db"
+	"disclaude/internal/db"
 )
 
 // UserService はユーザー認証・管理を行うサービス
@@ -26,7 +26,7 @@ func (s *UserService) InitializeUser(discordID, username string, isOwner bool) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
-	
+
 	if existingUser != nil {
 		return existingUser, nil
 	}
@@ -52,7 +52,7 @@ func (s *UserService) GetUser(discordID string) (*db.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
-	
+
 	return user, nil
 }
 
@@ -62,7 +62,7 @@ func (s *UserService) IsUserExists(discordID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return user != nil, nil
 }
 
@@ -73,11 +73,11 @@ func (s *UserService) AddUser(requesterDiscordID, targetDiscordID, targetUsernam
 	if err != nil {
 		return nil, fmt.Errorf("failed to get requester: %w", err)
 	}
-	
+
 	if requester == nil {
 		return nil, fmt.Errorf("requester not found")
 	}
-	
+
 	if !requester.IsOwner() {
 		return nil, fmt.Errorf("insufficient permissions: only owners can add users")
 	}
@@ -87,7 +87,7 @@ func (s *UserService) AddUser(requesterDiscordID, targetDiscordID, targetUsernam
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing target user: %w", err)
 	}
-	
+
 	if existingUser != nil {
 		return nil, fmt.Errorf("user already exists")
 	}
@@ -108,11 +108,11 @@ func (s *UserService) PromoteToOwner(requesterDiscordID, targetDiscordID string)
 	if err != nil {
 		return fmt.Errorf("failed to get requester: %w", err)
 	}
-	
+
 	if requester == nil {
 		return fmt.Errorf("requester not found")
 	}
-	
+
 	if !requester.IsOwner() {
 		return fmt.Errorf("insufficient permissions: only owners can promote users")
 	}
@@ -122,11 +122,11 @@ func (s *UserService) PromoteToOwner(requesterDiscordID, targetDiscordID string)
 	if err != nil {
 		return fmt.Errorf("failed to get target user: %w", err)
 	}
-	
+
 	if targetUser == nil {
 		return fmt.Errorf("target user not found")
 	}
-	
+
 	if targetUser.IsOwner() {
 		return fmt.Errorf("user is already an owner")
 	}
@@ -146,11 +146,11 @@ func (s *UserService) DemoteFromOwner(requesterDiscordID, targetDiscordID string
 	if err != nil {
 		return fmt.Errorf("failed to get requester: %w", err)
 	}
-	
+
 	if requester == nil {
 		return fmt.Errorf("requester not found")
 	}
-	
+
 	if !requester.IsOwner() {
 		return fmt.Errorf("insufficient permissions: only owners can demote users")
 	}
@@ -165,11 +165,11 @@ func (s *UserService) DemoteFromOwner(requesterDiscordID, targetDiscordID string
 	if err != nil {
 		return fmt.Errorf("failed to get target user: %w", err)
 	}
-	
+
 	if targetUser == nil {
 		return fmt.Errorf("target user not found")
 	}
-	
+
 	if !targetUser.IsOwner() {
 		return fmt.Errorf("user is not an owner")
 	}
@@ -189,11 +189,11 @@ func (s *UserService) RemoveUser(requesterDiscordID, targetDiscordID string) err
 	if err != nil {
 		return fmt.Errorf("failed to get requester: %w", err)
 	}
-	
+
 	if requester == nil {
 		return fmt.Errorf("requester not found")
 	}
-	
+
 	if !requester.IsOwner() {
 		return fmt.Errorf("insufficient permissions: only owners can remove users")
 	}
@@ -208,7 +208,7 @@ func (s *UserService) RemoveUser(requesterDiscordID, targetDiscordID string) err
 	if err != nil {
 		return fmt.Errorf("failed to get target user: %w", err)
 	}
-	
+
 	if targetUser == nil {
 		return fmt.Errorf("target user not found")
 	}

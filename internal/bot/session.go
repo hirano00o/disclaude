@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"discord-claude/internal/db"
+	"disclaude/internal/db"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,11 +18,11 @@ type SessionManager struct {
 
 // SessionInfo はセッション情報を表す構造体
 type SessionInfo struct {
-	Session     *db.Session
-	Sandbox     *db.Sandbox
-	IsActive    bool
-	Duration    time.Duration
-	User        *db.User
+	Session  *db.Session
+	Sandbox  *db.Sandbox
+	IsActive bool
+	Duration time.Duration
+	User     *db.User
 }
 
 // NewSessionManager は新しいSessionManagerを作成する
@@ -97,7 +97,7 @@ func (sm *SessionManager) ValidateSessionOwnership(threadID, userDiscordID strin
 func (sm *SessionManager) CleanupInactiveSessions(ctx context.Context, maxAge time.Duration) error {
 	// 指定時間以上古い非アクティブセッションを取得
 	cutoffTime := time.Now().Add(-maxAge)
-	
+
 	// TODO: データベースクエリを追加してクリーンアップ対象のセッションを取得
 	// この機能は将来的な拡張として実装可能
 
@@ -160,9 +160,9 @@ func (sm *SessionManager) GetSessionStatistics() (*SessionStatistics, error) {
 	// この機能は将来的な拡張として実装可能
 
 	return &SessionStatistics{
-		TotalSessions:     0,
-		ActiveSessions:    0,
-		TerminatedSessions: 0,
+		TotalSessions:          0,
+		ActiveSessions:         0,
+		TerminatedSessions:     0,
 		AverageSessionDuration: 0,
 	}, nil
 }

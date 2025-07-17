@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Discord Claude システムのデプロイスクリプト
+# Disclaude システムのデプロイスクリプト
 set -e
 
-NAMESPACE="discord-claude"
+NAMESPACE="disclaude"
 KUSTOMIZE_DIR="k8s"
 
-echo "🚀 Discord Claude システムのデプロイを開始します..."
+echo "🚀 Disclaude システムのデプロイを開始します..."
 
 # 前提条件のチェック
 echo "📋 前提条件をチェック中..."
@@ -93,14 +93,14 @@ else
 fi
 
 # Discord Botの起動を待機
-echo "🤖 Discord Bot の起動を待機中..."
-kubectl wait --for=condition=ready pod -l app=discord-claude-bot -n $NAMESPACE --timeout=300s
+echo "🤖 Disclaude Bot の起動を待機中..."
+kubectl wait --for=condition=ready pod -l app=disclaude-bot -n $NAMESPACE --timeout=300s
 
 if [ $? -eq 0 ]; then
-    echo "✅ Discord Bot が正常に起動しました"
+    echo "✅ Disclaude Bot が正常に起動しました"
 else
-    echo "❌ Discord Bot の起動がタイムアウトしました"
-    kubectl logs -l app=discord-claude-bot -n $NAMESPACE --tail=50
+    echo "❌ Disclaude Bot の起動がタイムアウトしました"
+    kubectl logs -l app=disclaude-bot -n $NAMESPACE --tail=50
     exit 1
 fi
 
@@ -115,9 +115,9 @@ echo ""
 echo "📝 次のステップ:"
 echo "1. Discord サーバーで Bot をテスト"
 echo "2. /claude start コマンドでサンドボックスをテスト"
-echo "3. ログを確認: kubectl logs -l app=discord-claude-bot -n $NAMESPACE -f"
+echo "3. ログを確認: kubectl logs -l app=disclaude-bot -n $NAMESPACE -f"
 echo ""
 echo "🔍 トラブルシューティング:"
-echo "- ポッド状態確認: kubectl describe pod -l app=discord-claude-bot -n $NAMESPACE"
+echo "- ポッド状態確認: kubectl describe pod -l app=disclaude-bot -n $NAMESPACE"
 echo "- PostgreSQL確認: kubectl logs -l app=postgresql -n $NAMESPACE"
 echo "- 設定確認: kubectl get configmap,secret -n $NAMESPACE"

@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"discord-claude/internal/bot"
-	"discord-claude/internal/config"
-	"discord-claude/internal/db"
+	"disclaude/internal/bot"
+	"disclaude/internal/config"
+	"disclaude/internal/db"
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"

@@ -4,7 +4,7 @@ metadata:
   name: postgresql-pv
   labels:
     app: postgresql
-    component: discord-claude
+    component: disclaude
 spec:
   capacity:
     storage: 10Gi
@@ -21,10 +21,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgresql-pvc
-  namespace: discord-claude
+  namespace: disclaude
   labels:
     app: postgresql
-    component: discord-claude
+    component: disclaude
 spec:
   accessModes:
     - ReadWriteOnce
@@ -38,10 +38,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
-  namespace: discord-claude
+  namespace: disclaude
   labels:
     app: postgresql
-    component: discord-claude
+    component: disclaude
 spec:
   selector:
     app: postgresql
@@ -57,10 +57,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgresql
-  namespace: discord-claude
+  namespace: disclaude
   labels:
     app: postgresql
-    component: discord-claude
+    component: disclaude
 spec:
   replicas: 1
   strategy:
@@ -72,7 +72,7 @@ spec:
     metadata:
       labels:
         app: postgresql
-        component: discord-claude
+        component: disclaude
     spec:
       containers:
       - name: postgresql
@@ -84,17 +84,17 @@ spec:
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-name
         - name: POSTGRES_USER
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-user
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: discord-claude-secrets
+              name: disclaude-secrets
               key: db-password
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
@@ -140,16 +140,16 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: postgresql-init
-  namespace: discord-claude
+  namespace: disclaude
   labels:
     app: postgresql-init
-    component: discord-claude
+    component: disclaude
 spec:
   template:
     metadata:
       labels:
         app: postgresql-init
-        component: discord-claude
+        component: disclaude
     spec:
       restartPolicy: OnFailure
       containers:
@@ -163,17 +163,17 @@ spec:
         - name: PGUSER
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-user
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: discord-claude-secrets
+              name: disclaude-secrets
               key: db-password
         - name: PGDATABASE
           valueFrom:
             configMapKeyRef:
-              name: discord-claude-config
+              name: disclaude-config
               key: db-name
         command:
         - /bin/sh

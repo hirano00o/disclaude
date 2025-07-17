@@ -75,7 +75,7 @@ Discord User → Discord → Discord Bot (Kubernetes) → Claude Code Sandbox (K
 ## ディレクトリ構成
 
 ```
-discord-claude/
+disclaude/
 ├── cmd/
 │   └── main.go
 ├── internal/
@@ -122,7 +122,7 @@ DB_PASSWORD=your_password
 DB_NAME=discord_claude
 
 # Kubernetes
-KUBERNETES_NAMESPACE=discord-claude
+KUBERNETES_NAMESPACE=disclaude
 MAX_SANDBOXES=3
 
 # Claude Code

@@ -1,4 +1,4 @@
-# Discord Claude
+# Disclaude
 
 DiscordからClaude Codeを操作するためのシステムです。Discordのスレッド機能を活用し、各ユーザーが独立したKubernetesサンドボックス環境でClaude Codeを利用できます。
 
@@ -71,8 +71,8 @@ Discord User → Discord → Discord Bot (Kubernetes) → Claude Code Sandbox (K
 
 ```bash
 # リポジトリのクローン
-git clone <repository-url>
-cd discord-claude
+git clone https://github.com/hirano00o/disclaude.git
+cd disclaude
 
 # Go モジュールの初期化
 go mod download
@@ -98,11 +98,11 @@ DISCORD_TOKEN=your_discord_bot_token
 DISCORD_GUILD_ID=your_guild_id
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=discord_claude
+DB_USER=disclaude
 DB_PASSWORD=your_password
-DB_NAME=discord_claude
+DB_NAME=disclaude
 CLAUDE_API_KEY=your_claude_api_key
-KUBERNETES_NAMESPACE=discord-claude
+KUBERNETES_NAMESPACE=disclaude
 MAX_SANDBOXES=3
 ```
 
@@ -114,10 +114,10 @@ MAX_SANDBOXES=3
 
 # ローカル開発環境の場合：
 docker run -d \
-  --name discord-claude-db \
-  -e POSTGRES_USER=discord_claude \
+  --name disclaude-db \
+  -e POSTGRES_USER=disclaude \
   -e POSTGRES_PASSWORD=your_password \
-  -e POSTGRES_DB=discord_claude \
+  -e POSTGRES_DB=disclaude \
   -p 5432:5432 \
   postgres:15
 
@@ -171,22 +171,22 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o discord-claude cmd/main.go
+RUN go build -o disclaude cmd/main.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
-COPY --from=builder /app/discord-claude .
+COPY --from=builder /app/disclaude .
 COPY --from=builder /app/sql ./sql
 
-CMD ["./discord-claude"]
+CMD ["./disclaude"]
 EOF
 
 # イメージのビルドとプッシュ
-docker build -t discord-claude:latest .
-docker tag discord-claude:latest your-registry/discord-claude:latest
-docker push your-registry/discord-claude:latest
+docker build -t disclaude:latest .
+docker tag disclaude:latest ghcr.io/hirano00o/disclaude:latest
+docker push ghcr.io/hirano00o/disclaude:latest
 ```
 
 ## 📖 使用方法
@@ -251,21 +251,21 @@ govulncheck ./...
 ```bash
 # テスト用データベースの準備
 docker run -d \
-  --name discord-claude-test-db \
+  --name disclaude-test-db \
   -e POSTGRES_USER=test_user \
   -e POSTGRES_PASSWORD=test_password \
-  -e POSTGRES_DB=test_discord_claude \
+  -e POSTGRES_DB=test_disclaude \
   -p 5433:5432 \
   postgres:13
 
 # テストの実行
-DB_HOST=localhost DB_PORT=5433 DB_USER=test_user DB_PASSWORD=test_password DB_NAME=test_discord_claude go test ./...
+DB_HOST=localhost DB_PORT=5433 DB_USER=test_user DB_PASSWORD=test_password DB_NAME=test_disclaude go test ./...
 ```
 
 ## 📁 プロジェクト構造
 
 ```
-discord-claude/
+disclaude/
 ├── cmd/
 │   └── main.go                 # エントリーポイント
 ├── internal/
@@ -346,7 +346,7 @@ discord-claude/
 
 ## 📞 サポート
 
-- 問題や質問は[Issues](https://github.com/your-repo/discord-claude/issues)で報告
+- 問題や質問は[Issues](https://github.com/hirano00o/disclaude/issues)で報告
 - ドキュメントは[CLAUDE.md](CLAUDE.md)を参照
 - 開発者向け情報は各パッケージのコメントを参照
 
@@ -360,11 +360,11 @@ discord-claude/
 ./scripts/cleanup.sh
 
 # ログ確認
-kubectl logs -l app=discord-claude-bot -n discord-claude -f
+kubectl logs -l app=disclaude-bot -n disclaude -f
 
 # データベース接続
-kubectl exec -it deployment/postgresql -n discord-claude -- psql -U discord_claude -d discord_claude
+kubectl exec -it deployment/postgresql -n disclaude -- psql -U disclaude -d disclaude
 
 # システム状態確認
-kubectl get pods,svc,pvc -n discord-claude
+kubectl get pods,svc,pvc -n disclaude
 ```

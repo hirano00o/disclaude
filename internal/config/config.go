@@ -86,7 +86,7 @@ func Load() (*Config, error) {
 			Database: os.Getenv("DB_NAME"),
 		},
 		Kubernetes: KubernetesConfig{
-			Namespace:    getEnvWithDefault("KUBERNETES_NAMESPACE", "discord-claude"),
+			Namespace:    getEnvWithDefault("KUBERNETES_NAMESPACE", "disclaude"),
 			MaxSandboxes: maxSandboxes,
 		},
 		Claude: ClaudeConfig{

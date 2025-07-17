@@ -53,7 +53,7 @@ func getKubernetesConfig() (*rest.Config, error) {
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
-	
+
 	// 環境変数からkubeconfigパスを取得
 	if kubeconfigEnv := os.Getenv("KUBECONFIG"); kubeconfigEnv != "" {
 		kubeconfig = kubeconfigEnv
@@ -85,7 +85,7 @@ func (c *Client) GetNamespace() string {
 // CreateNamespace は名前空間を作成する
 func (c *Client) CreateNamespace(ctx context.Context) error {
 	nsClient := c.clientset.CoreV1().Namespaces()
-	
+
 	// 名前空間の存在確認
 	_, err := nsClient.Get(ctx, c.namespace, metav1.GetOptions{})
 	if err == nil {
@@ -98,7 +98,7 @@ func (c *Client) CreateNamespace(ctx context.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: c.namespace,
 			Labels: map[string]string{
-				"app": "discord-claude",
+				"app": "disclaude",
 			},
 		},
 	}
@@ -114,7 +114,7 @@ func (c *Client) CreateNamespace(ctx context.Context) error {
 // DeleteNamespace は名前空間を削除する
 func (c *Client) DeleteNamespace(ctx context.Context) error {
 	nsClient := c.clientset.CoreV1().Namespaces()
-	
+
 	err := nsClient.Delete(ctx, c.namespace, metav1.DeleteOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to delete namespace %s: %w", c.namespace, err)
@@ -126,7 +126,7 @@ func (c *Client) DeleteNamespace(ctx context.Context) error {
 // IsNamespaceReady は名前空間が準備完了かチェックする
 func (c *Client) IsNamespaceReady(ctx context.Context) (bool, error) {
 	nsClient := c.clientset.CoreV1().Namespaces()
-	
+
 	namespace, err := nsClient.Get(ctx, c.namespace, metav1.GetOptions{})
 	if err != nil {
 		return false, fmt.Errorf("failed to get namespace %s: %w", c.namespace, err)

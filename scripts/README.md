@@ -1,11 +1,11 @@
-# Discord Claude デプロイスクリプト
+# Disclaude デプロイスクリプト
 
-このディレクトリには、Discord Claudeシステムのデプロイとメンテナンスのためのスクリプトが含まれています。
+このディレクトリには、Disclaudeシステムのデプロイとメンテナンスのためのスクリプトが含まれています。
 
 ## 📁 スクリプト一覧
 
 ### `deploy.sh`
-Discord Claudeシステムを自動デプロイするスクリプトです。
+Disclaudeシステムを自動デプロイするスクリプトです。
 
 **機能:**
 - 前提条件のチェック
@@ -29,7 +29,7 @@ Discord Claudeシステムを自動デプロイするスクリプトです。
 - シークレット情報（Discord Token、DB Password、Claude API Key）が準備済み
 
 ### `cleanup.sh`
-Discord Claudeシステムを完全にクリーンアップするスクリプトです。
+Disclaudeシステムを完全にクリーンアップするスクリプトです。
 
 **機能:**
 - 実行中のサンドボックスの削除
@@ -134,10 +134,10 @@ kubectl apply -f k8s/service.yaml
 ### PostgreSQL起動エラー
 ```bash
 # PostgreSQLログの確認
-kubectl logs -l app=postgresql -n discord-claude
+kubectl logs -l app=postgresql -n disclaude
 
 # PVCの状態確認
-kubectl get pvc -n discord-claude
+kubectl get pvc -n disclaude
 
 # NFSマウントの確認
 kubectl describe pv postgresql-pv
@@ -146,20 +146,20 @@ kubectl describe pv postgresql-pv
 ### Discord Bot起動エラー
 ```bash
 # Botログの確認
-kubectl logs -l app=discord-claude-bot -n discord-claude
+kubectl logs -l app=disclaude-bot -n disclaude
 
 # 設定の確認
-kubectl get configmap discord-claude-config -n discord-claude -o yaml
-kubectl get secret discord-claude-secrets -n discord-claude -o yaml
+kubectl get configmap disclaude-config -n disclaude -o yaml
+kubectl get secret disclaude-secrets -n disclaude -o yaml
 ```
 
 ### スキーマ初期化エラー
 ```bash
 # 初期化ジョブログの確認
-kubectl logs job/postgresql-schema-init -n discord-claude
+kubectl logs job/postgresql-schema-init -n disclaude
 
 # データベース接続テスト
-kubectl exec -it deployment/postgresql -n discord-claude -- psql -U discord_claude -d discord_claude -c "SELECT version();"
+kubectl exec -it deployment/postgresql -n disclaude -- psql -U discord_claude -d discord_claude -c "SELECT version();"
 ```
 
 ## 🚨 緊急時の対応
@@ -167,8 +167,8 @@ kubectl exec -it deployment/postgresql -n discord-claude -- psql -U discord_clau
 ### 全システム停止
 ```bash
 # 緊急停止
-kubectl delete deployment discord-claude-bot -n discord-claude
-kubectl delete pods -l app=claude-sandbox -n discord-claude --force --grace-period=0
+kubectl delete deployment disclaude-bot -n disclaude
+kubectl delete pods -l app=claude-sandbox -n disclaude --force --grace-period=0
 
 # 完全クリーンアップ
 ./scripts/cleanup.sh
@@ -177,10 +177,10 @@ kubectl delete pods -l app=claude-sandbox -n discord-claude --force --grace-peri
 ### データベース復旧
 ```bash
 # PostgreSQL再起動
-kubectl rollout restart deployment/postgresql -n discord-claude
+kubectl rollout restart deployment/postgresql -n disclaude
 
 # スキーマ再初期化
-kubectl delete job postgresql-schema-init -n discord-claude
+kubectl delete job postgresql-schema-init -n disclaude
 kubectl apply -f k8s/init-schema.yaml
 ```
 
@@ -189,23 +189,23 @@ kubectl apply -f k8s/init-schema.yaml
 ### 基本監視コマンド
 ```bash
 # システム状態
-kubectl get pods,svc,pvc -n discord-claude
+kubectl get pods,svc,pvc -n disclaude
 
 # リソース使用量
-kubectl top pods -n discord-claude
+kubectl top pods -n disclaude
 
 # イベント確認
-kubectl get events -n discord-claude --sort-by=.metadata.creationTimestamp
+kubectl get events -n disclaude --sort-by=.metadata.creationTimestamp
 ```
 
 ### ログ監視
 ```bash
 # Bot リアルタイムログ
-kubectl logs -l app=discord-claude-bot -n discord-claude -f
+kubectl logs -l app=disclaude-bot -n disclaude -f
 
 # PostgreSQL ログ
-kubectl logs -l app=postgresql -n discord-claude -f
+kubectl logs -l app=postgresql -n disclaude -f
 
 # すべてのログ
-kubectl logs -l component=discord-claude -n discord-claude -f
+kubectl logs -l component=disclaude -n disclaude -f
 ```

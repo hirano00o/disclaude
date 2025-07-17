@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"discord-claude/internal/db"
+	"disclaude/internal/db"
 )
 
 // PermissionService は権限管理を行うサービス
@@ -36,7 +36,7 @@ func (s *PermissionService) GetUserPermission(discordID string) (Permission, err
 	if err != nil {
 		return PermissionNone, fmt.Errorf("failed to get user: %w", err)
 	}
-	
+
 	if user == nil {
 		return PermissionNone, nil
 	}
@@ -57,7 +57,7 @@ func (s *PermissionService) CanCreateSandbox(discordID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return permission >= PermissionUser, nil
 }
 
@@ -67,7 +67,7 @@ func (s *PermissionService) CanManageUsers(discordID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return permission >= PermissionOwner, nil
 }
 
@@ -77,24 +77,24 @@ func (s *PermissionService) CanDeleteSandbox(discordID string, sessionUserID int
 	if err != nil {
 		return false, err
 	}
-	
+
 	// オーナーは全てのサンドボックスを削除可能
 	if permission >= PermissionOwner {
 		return true, nil
 	}
-	
+
 	// 一般ユーザーは自分のサンドボックスのみ削除可能
 	if permission >= PermissionUser {
 		user, err := s.db.GetUserByDiscordID(discordID)
 		if err != nil {
 			return false, fmt.Errorf("failed to get user: %w", err)
 		}
-		
+
 		if user != nil && user.ID == sessionUserID {
 			return true, nil
 		}
 	}
-	
+
 	return false, nil
 }
 
@@ -104,7 +104,7 @@ func (s *PermissionService) RequirePermission(discordID string, requiredPermissi
 	if err != nil {
 		return fmt.Errorf("failed to get user permission: %w", err)
 	}
-	
+
 	if permission < requiredPermission {
 		switch requiredPermission {
 		case PermissionUser:
@@ -115,7 +115,7 @@ func (s *PermissionService) RequirePermission(discordID string, requiredPermissi
 			return fmt.Errorf("十分な権限がありません")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -125,7 +125,7 @@ func (s *PermissionService) IsOwner(discordID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return permission == PermissionOwner, nil
 }
 
@@ -135,7 +135,7 @@ func (s *PermissionService) IsUser(discordID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return permission >= PermissionUser, nil
 }
 
@@ -145,7 +145,7 @@ func (s *PermissionService) ValidateUserAction(discordID string, action string) 
 	if err != nil {
 		return fmt.Errorf("failed to get user permission: %w", err)
 	}
-	
+
 	switch action {
 	case "create_sandbox", "close_sandbox":
 		if permission < PermissionUser {
@@ -158,6 +158,6 @@ func (s *PermissionService) ValidateUserAction(discordID string, action string) 
 	default:
 		return fmt.Errorf("不明な操作: %s", action)
 	}
-	
+
 	return nil
 }

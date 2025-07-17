@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"discord-claude/internal/k8s"
+	"disclaude/internal/k8s"
 
 	"github.com/sirupsen/logrus"
 )
@@ -27,10 +27,10 @@ func NewClaudeService(sandboxManager *k8s.SandboxManager) *ClaudeService {
 func (cs *ClaudeService) SendMessage(ctx context.Context, podName, message string) (string, error) {
 	// メッセージの前処理
 	processedMessage := cs.preprocessMessage(message)
-	
+
 	// Claude Codeコマンドの構築
 	claudeCommand := fmt.Sprintf("echo %s | claude", cs.escapeShellString(processedMessage))
-	
+
 	// サンドボックス内でコマンド実行
 	response, err := cs.sandboxManager.ExecuteCommand(ctx, podName, claudeCommand)
 	if err != nil {
@@ -39,11 +39,11 @@ func (cs *ClaudeService) SendMessage(ctx context.Context, podName, message strin
 
 	// 応答の後処理
 	processedResponse := cs.postprocessResponse(response)
-	
+
 	logrus.WithFields(logrus.Fields{
-		"pod_name":      podName,
-		"message_len":   len(message),
-		"response_len":  len(processedResponse),
+		"pod_name":     podName,
+		"message_len":  len(message),
+		"response_len": len(processedResponse),
 	}).Debug("Claude Code message processed")
 
 	return processedResponse, nil
@@ -52,10 +52,10 @@ func (cs *ClaudeService) SendMessage(ctx context.Context, podName, message strin
 // SendFileContent はファイル内容をClaude Codeに送信する
 func (cs *ClaudeService) SendFileContent(ctx context.Context, podName, filePath, content string) error {
 	// ファイル作成コマンドの構築
-	createFileCommand := fmt.Sprintf("cat > %s << 'EOF'\n%s\nEOF", 
-		cs.escapeShellString(filePath), 
+	createFileCommand := fmt.Sprintf("cat > %s << 'EOF'\n%s\nEOF",
+		cs.escapeShellString(filePath),
 		content)
-	
+
 	// サンドボックス内でファイル作成
 	_, err := cs.sandboxManager.ExecuteCommand(ctx, podName, createFileCommand)
 	if err != nil {
@@ -63,8 +63,8 @@ func (cs *ClaudeService) SendFileContent(ctx context.Context, podName, filePath,
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"pod_name":   podName,
-		"file_path":  filePath,
+		"pod_name":    podName,
+		"file_path":   filePath,
 		"content_len": len(content),
 	}).Debug("File created in sandbox")
 
@@ -75,7 +75,7 @@ func (cs *ClaudeService) SendFileContent(ctx context.Context, podName, filePath,
 func (cs *ClaudeService) GetFileContent(ctx context.Context, podName, filePath string) (string, error) {
 	// ファイル読み取りコマンドの構築
 	readFileCommand := fmt.Sprintf("cat %s", cs.escapeShellString(filePath))
-	
+
 	// サンドボックス内でファイル読み取り
 	content, err := cs.sandboxManager.ExecuteCommand(ctx, podName, readFileCommand)
 	if err != nil {
@@ -91,10 +91,10 @@ func (cs *ClaudeService) ListFiles(ctx context.Context, podName, directory strin
 	if directory == "" {
 		directory = "."
 	}
-	
+
 	// ファイル一覧取得コマンドの構築
 	listCommand := fmt.Sprintf("ls -la %s", cs.escapeShellString(directory))
-	
+
 	// サンドボックス内でコマンド実行
 	output, err := cs.sandboxManager.ExecuteCommand(ctx, podName, listCommand)
 	if err != nil {
@@ -110,7 +110,7 @@ func (cs *ClaudeService) ExecuteShellCommand(ctx context.Context, podName, comma
 	if cs.isDangerousCommand(command) {
 		return "", fmt.Errorf("dangerous command detected: %s", command)
 	}
-	
+
 	// サンドボックス内でコマンド実行
 	output, err := cs.sandboxManager.ExecuteCommand(ctx, podName, command)
 	if err != nil {
@@ -170,15 +170,15 @@ This is a temporary sandbox environment for Discord Claude integration.
 func (cs *ClaudeService) preprocessMessage(message string) string {
 	// 基本的なサニタイズ
 	message = strings.TrimSpace(message)
-	
+
 	// Discord特有のマークダウンを除去
 	message = strings.ReplaceAll(message, "```", "")
 	message = strings.ReplaceAll(message, "`", "'")
-	
+
 	// 改行の正規化
 	message = strings.ReplaceAll(message, "\r\n", "\n")
 	message = strings.ReplaceAll(message, "\r", "\n")
-	
+
 	return message
 }
 
@@ -186,11 +186,11 @@ func (cs *ClaudeService) preprocessMessage(message string) string {
 func (cs *ClaudeService) postprocessResponse(response string) string {
 	// 不要な制御文字を除去
 	response = strings.TrimSpace(response)
-	
+
 	// ANSI エスケープシーケンスの除去（簡易版）
 	lines := strings.Split(response, "\n")
 	var cleanLines []string
-	
+
 	for _, line := range lines {
 		// 基本的なANSIエスケープシーケンスを除去
 		cleanLine := strings.TrimSpace(line)
@@ -198,15 +198,15 @@ func (cs *ClaudeService) postprocessResponse(response string) string {
 			cleanLines = append(cleanLines, cleanLine)
 		}
 	}
-	
+
 	result := strings.Join(cleanLines, "\n")
-	
+
 	// Discord メッセージ長制限への対応
 	const maxDiscordMessageLength = 2000
 	if len(result) > maxDiscordMessageLength {
 		result = result[:maxDiscordMessageLength-100] + "\n\n... (出力が長すぎるため省略されました)"
 	}
-	
+
 	return result
 }
 
@@ -220,7 +220,7 @@ func (cs *ClaudeService) escapeShellString(s string) string {
 func (cs *ClaudeService) isDangerousCommand(command string) bool {
 	dangerousCommands := []string{
 		"rm -rf /",
-		":(){ :|:& };:",  // fork bomb
+		":(){ :|:& };:", // fork bomb
 		"dd if=/dev/zero",
 		"mkfs.",
 		"fdisk",
@@ -231,15 +231,15 @@ func (cs *ClaudeService) isDangerousCommand(command string) bool {
 		"reboot",
 		"shutdown",
 	}
-	
+
 	lowerCommand := strings.ToLower(strings.TrimSpace(command))
-	
+
 	for _, dangerous := range dangerousCommands {
 		if strings.Contains(lowerCommand, dangerous) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -250,25 +250,25 @@ func (cs *ClaudeService) GetSandboxInfo(ctx context.Context, podName string) (*S
 	if err != nil {
 		systemInfo = "Unknown"
 	}
-	
+
 	// ディスク使用量の取得
 	diskUsage, err := cs.sandboxManager.ExecuteCommand(ctx, podName, "df -h /workspace")
 	if err != nil {
 		diskUsage = "Unknown"
 	}
-	
+
 	// メモリ使用量の取得
 	memoryUsage, err := cs.sandboxManager.ExecuteCommand(ctx, podName, "free -h")
 	if err != nil {
 		memoryUsage = "Unknown"
 	}
-	
+
 	// 作業ディレクトリの内容
 	workspaceContent, err := cs.ListFiles(ctx, podName, "/workspace")
 	if err != nil {
 		workspaceContent = "Unable to list files"
 	}
-	
+
 	return &SandboxInfo{
 		PodName:          podName,
 		SystemInfo:       systemInfo,

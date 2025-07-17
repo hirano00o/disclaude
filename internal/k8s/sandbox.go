@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"discord-claude/internal/config"
-	"discord-claude/internal/db"
+	"disclaude/internal/config"
+	"disclaude/internal/db"
 
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
-	"github.com/sirupsen/logrus"
 )
 
 // SandboxManager はサンドボックスの管理を行う
@@ -43,14 +43,14 @@ func (s *SandboxManager) CreateSandbox(ctx context.Context, sessionID int, threa
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sandbox usage: %w", err)
 	}
-	
+
 	if !usage.CanCreateSandbox() {
 		return nil, fmt.Errorf("サンドボックスの上限に達しています（%d/%d）", usage.CurrentCount, usage.MaxCount)
 	}
 
 	// Pod名の生成
 	podName := fmt.Sprintf("claude-sandbox-%s", strings.ReplaceAll(threadID, "_", "-"))
-	
+
 	// データベースにサンドボックス情報を記録
 	sandbox, err := s.db.CreateSandbox(sessionID, podName, s.client.namespace)
 	if err != nil {
@@ -98,7 +98,7 @@ func (s *SandboxManager) createPodSpec(podName, threadID string) *corev1.Pod {
 			Labels: map[string]string{
 				"app":       "claude-sandbox",
 				"thread-id": threadID,
-				"component": "discord-claude",
+				"component": "disclaude",
 			},
 		},
 		Spec: corev1.PodSpec{
@@ -170,7 +170,7 @@ func (s *SandboxManager) createPodSpec(podName, threadID string) *corev1.Pod {
 // DeleteSandbox はサンドボックス（Pod）を削除する
 func (s *SandboxManager) DeleteSandbox(ctx context.Context, podName string) error {
 	podClient := s.client.clientset.CoreV1().Pods(s.client.namespace)
-	
+
 	// Podの削除
 	err := podClient.Delete(ctx, podName, metav1.DeleteOptions{})
 	if err != nil {
@@ -203,13 +203,13 @@ func (s *SandboxManager) DeleteSandbox(ctx context.Context, podName string) erro
 // ExecuteCommand はサンドボックス内でコマンドを実行する
 func (s *SandboxManager) ExecuteCommand(ctx context.Context, podName, command string) (string, error) {
 	podClient := s.client.clientset.CoreV1().Pods(s.client.namespace)
-	
+
 	// Podの存在確認
 	pod, err := podClient.Get(ctx, podName, metav1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to get pod: %w", err)
 	}
-	
+
 	if pod.Status.Phase != corev1.PodRunning {
 		return "", fmt.Errorf("pod is not running: %s", pod.Status.Phase)
 	}
@@ -261,7 +261,7 @@ func (s *SandboxManager) ExecuteCommand(ctx context.Context, podName, command st
 // GetSandboxStatus はサンドボックスのステータスを取得する
 func (s *SandboxManager) GetSandboxStatus(ctx context.Context, podName string) (string, error) {
 	podClient := s.client.clientset.CoreV1().Pods(s.client.namespace)
-	
+
 	pod, err := podClient.Get(ctx, podName, metav1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to get pod: %w", err)
@@ -273,7 +273,7 @@ func (s *SandboxManager) GetSandboxStatus(ctx context.Context, podName string) (
 // WaitForSandboxReady はサンドボックスが準備完了になるまで待機する
 func (s *SandboxManager) WaitForSandboxReady(ctx context.Context, podName string, timeout time.Duration) error {
 	podClient := s.client.clientset.CoreV1().Pods(s.client.namespace)
-	
+
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -296,7 +296,7 @@ func (s *SandboxManager) WaitForSandboxReady(ctx context.Context, podName string
 						break
 					}
 				}
-				
+
 				if allReady {
 					return nil
 				}
@@ -314,11 +314,11 @@ func (s *SandboxManager) WaitForSandboxReady(ctx context.Context, podName string
 // ListSandboxes はサンドボックス一覧を取得する
 func (s *SandboxManager) ListSandboxes(ctx context.Context) ([]corev1.Pod, error) {
 	podClient := s.client.clientset.CoreV1().Pods(s.client.namespace)
-	
+
 	listOptions := metav1.ListOptions{
 		LabelSelector: "app=claude-sandbox",
 	}
-	
+
 	podList, err := podClient.List(ctx, listOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pods: %w", err)

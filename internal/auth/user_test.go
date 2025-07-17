@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"discord-claude/internal/db"
+	"disclaude/internal/db"
 )
 
 // TestUserServiceInitializeUser はユーザー初期化のテスト
@@ -160,8 +160,8 @@ func TestUserServiceRemoveUser(t *testing.T) {
 
 // MockDB はテスト用のモックデータベース
 type MockDB struct {
-	users   map[string]*db.User
-	nextID  int
+	users  map[string]*db.User
+	nextID int
 }
 
 func (m *MockDB) GetUserByDiscordID(discordID string) (*db.User, error) {

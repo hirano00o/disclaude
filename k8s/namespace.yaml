@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: discord-claude
+  name: disclaude
   labels:
-    app: discord-claude
-    component: discord-claude
+    app: disclaude
+    component: disclaude
     environment: production
 
 ---
@@ -12,11 +12,11 @@ metadata:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: discord-claude-network-policy
-  namespace: discord-claude
+  name: disclaude-network-policy
+  namespace: disclaude
   labels:
-    app: discord-claude
-    component: discord-claude
+    app: disclaude
+    component: disclaude
 spec:
   podSelector:
     matchLabels:
@@ -30,7 +30,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: discord-claude-bot
+          app: disclaude-bot
     ports:
     - protocol: TCP
       port: 22
@@ -66,11 +66,11 @@ spec:
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: discord-claude-quota
-  namespace: discord-claude
+  name: disclaude-quota
+  namespace: disclaude
   labels:
-    app: discord-claude
-    component: discord-claude
+    app: disclaude
+    component: disclaude
 spec:
   hard:
     # Podの最大数
@@ -98,11 +98,11 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: discord-claude-limits
-  namespace: discord-claude
+  name: disclaude-limits
+  namespace: disclaude
   labels:
-    app: discord-claude
-    component: discord-claude
+    app: disclaude
+    component: disclaude
 spec:
   limits:
   # Pod制限

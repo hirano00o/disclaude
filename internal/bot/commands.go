@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"discord-claude/internal/db"
+	"disclaude/internal/db"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"

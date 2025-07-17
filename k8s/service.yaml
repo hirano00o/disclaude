@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: discord-claude-bot
-  namespace: discord-claude
+  name: disclaude-bot
+  namespace: disclaude
   labels:
-    app: discord-claude-bot
-    component: discord-claude
+    app: disclaude-bot
+    component: disclaude
 spec:
   selector:
-    app: discord-claude-bot
+    app: disclaude-bot
   ports:
   - name: http
     port: 80

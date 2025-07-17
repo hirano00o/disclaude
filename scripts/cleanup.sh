@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Discord Claude システムのクリーンアップスクリプト
+# Disclaude システムのクリーンアップスクリプト
 set -e
 
-NAMESPACE="discord-claude"
+NAMESPACE="disclaude"
 
-echo "🧹 Discord Claude システムのクリーンアップを開始します..."
+echo "🧹 Disclaude システムのクリーンアップを開始します..."
 
 # 確認プロンプト
 echo "⚠️  このスクリプトは以下を削除します:"
@@ -33,8 +33,8 @@ else
 fi
 
 # アプリケーションの削除
-echo "🤖 Discord Bot を削除中..."
-kubectl delete deployment discord-claude-bot -n $NAMESPACE --ignore-not-found=true
+echo "🤖 Disclaude Bot を削除中..."
+kubectl delete deployment disclaude-bot -n $NAMESPACE --ignore-not-found=true
 
 echo "🗄️  PostgreSQL を削除中..."
 kubectl delete deployment postgresql -n $NAMESPACE --ignore-not-found=true
@@ -70,8 +70,8 @@ kubectl delete role -n $NAMESPACE --all
 kubectl delete serviceaccount -n $NAMESPACE --all
 
 # ClusterRole と ClusterRoleBinding の削除
-kubectl delete clusterrolebinding discord-claude-namespace-manager --ignore-not-found=true
-kubectl delete clusterrole discord-claude-namespace-manager --ignore-not-found=true
+kubectl delete clusterrolebinding disclaude-namespace-manager --ignore-not-found=true
+kubectl delete clusterrole disclaude-namespace-manager --ignore-not-found=true
 kubectl delete clusterrolebinding nfs-provisioner --ignore-not-found=true
 kubectl delete clusterrole nfs-provisioner --ignore-not-found=true
 
@@ -105,7 +105,7 @@ echo "🎉 クリーンアップが完了しました！"
 echo ""
 echo "📊 残存リソース確認:"
 echo "PV:"
-kubectl get pv | grep discord-claude || echo "  なし"
+kubectl get pv | grep disclaude || echo "  なし"
 echo "StorageClass:"
 kubectl get storageclass nfs-storage 2>/dev/null || echo "  なし"
 echo ""

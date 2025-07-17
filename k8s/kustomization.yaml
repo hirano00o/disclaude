@@ -2,11 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
-  name: discord-claude
-  namespace: discord-claude
+  name: disclaude
+  namespace: disclaude
 
 # 名前空間の指定
-namespace: discord-claude
+namespace: disclaude
 
 # リソースの適用順序を管理
 resources:
@@ -33,9 +33,9 @@ resources:
 
 # 共通ラベルの追加
 commonLabels:
-  app.kubernetes.io/name: discord-claude
+  app.kubernetes.io/name: disclaude
   app.kubernetes.io/version: "v1.0.0"
-  app.kubernetes.io/component: discord-bot
+  app.kubernetes.io/component: disclaude-bot
 
 # 共通アノテーションの追加
 commonAnnotations:
@@ -43,7 +43,7 @@ commonAnnotations:
 
 # イメージのタグを管理
 images:
-  - name: discord-claude
+  - name: disclaude
     newTag: latest
 
 # 設定の変更（例：レプリカ数）
@@ -56,7 +56,7 @@ patches:
       group: apps
       version: v1
       kind: Deployment
-      name: discord-claude-bot
+      name: disclaude-bot
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory

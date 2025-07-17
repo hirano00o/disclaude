@@ -148,7 +148,7 @@ func TestSandboxCRUD(t *testing.T) {
 	}
 
 	// サンドボックス作成テスト
-	sandbox, err := db.CreateSandbox(session.ID, "test-pod", "discord-claude")
+	sandbox, err := db.CreateSandbox(session.ID, "test-pod", "disclaude")
 	if err != nil {
 		t.Fatalf("Failed to create sandbox: %v", err)
 	}
@@ -249,7 +249,7 @@ func setupTestDB(t *testing.T) *DB {
 		Port:     5432,
 		User:     "test_user",
 		Password: "test_password",
-		Database: "test_discord_claude",
+		Database: "test_disclaude",
 	}
 
 	db, err := NewConnection(config)
@@ -273,7 +273,7 @@ func setupTestDB(t *testing.T) *DB {
 func cleanupTestData(t *testing.T, db *DB) {
 	// 外部キー制約を考慮した順序で削除
 	tables := []string{"sandboxes", "sessions", "users"}
-	
+
 	for _, table := range tables {
 		_, err := db.Exec("DELETE FROM " + table + " WHERE created_at < NOW()")
 		if err != nil {

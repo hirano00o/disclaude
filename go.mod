@@ -1,4 +1,4 @@
-module discord-claude
+module github.com/hirano00o/disclaude
 
 go 1.24
 
