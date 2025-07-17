@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: discord-claude-config
+  namespace: discord-claude
+  labels:
+    app: discord-claude
+    component: discord-claude
+data:
+  # Discord設定
+  discord-guild-id: ""  # 実際のGuild IDを設定
+  
+  # データベース設定
+  db-host: "postgresql"
+  db-port: "5432"
+  db-user: "discord_claude"
+  db-name: "discord_claude"
+  
+  # Kubernetes設定
+  max-sandboxes: "3"
+  
+  # Claude Code設定
+  claude-config-path: "/home/user/.claude"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: claude-config
+  namespace: discord-claude
+  labels:
+    app: claude-sandbox
+    component: discord-claude
+data:
+  # Claude Code設定ファイル
+  CLAUDE.md: |
+    # Claude Code Environment
+
+    ## Discord Claude Integration
+
+    This is a temporary sandbox environment created for Discord Claude integration.
+
+    ### Environment Details
+    - CPU: 1GB
+    - Memory: 2GB  
+    - Storage: Temporary (EmptyDir)
+    - Network: Unrestricted
+    - Namespace: discord-claude
+
+    ### Available Tools
+    - Claude Code CLI
+    - Git
+    - Basic development tools
+    - File system access
+    - Python, Node.js, Go (if available in base image)
+
+    ### Usage Guidelines
+    - All data is temporary and will be lost when the session ends
+    - Files are not persisted between sessions
+    - Use `/claude close` in Discord to end the session
+    - Session timeout: No limit (manual termination required)
+
+    ### Security Notes
+    - This environment is isolated from other sandboxes
+    - No network access to internal services
+    - No persistent storage
+    - Resource limits enforced
+
+    ### Support
+    - Use Discord thread for communication
+    - Report issues to bot administrators
+    - Session management via Discord commands
+
+  settings.json: |
+    {
+      "anthropic_api_key": "${ANTHROPIC_API_KEY}",
+      "max_tokens": 4096,
+      "model": "claude-3-sonnet-20240229",
+      "temperature": 0.7
+    }

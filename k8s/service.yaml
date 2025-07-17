@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: discord-claude-bot
+  namespace: discord-claude
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+spec:
+  selector:
+    app: discord-claude-bot
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP

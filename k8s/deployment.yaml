@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-claude-bot
+  namespace: discord-claude
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-claude-bot
+  template:
+    metadata:
+      labels:
+        app: discord-claude-bot
+        component: discord-claude
+    spec:
+      serviceAccountName: discord-claude-bot
+      containers:
+      - name: discord-claude-bot
+        image: discord-claude:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: discord-claude-secrets
+              key: discord-token
+        - name: DISCORD_GUILD_ID
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: discord-guild-id
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-host
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-port
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: discord-claude-secrets
+              key: db-password
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: db-name
+        - name: KUBERNETES_NAMESPACE
+          value: "discord-claude"
+        - name: MAX_SANDBOXES
+          valueFrom:
+            configMapKeyRef:
+              name: discord-claude-config
+              key: max-sandboxes
+        - name: CLAUDE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: discord-claude-secrets
+              key: claude-api-key
+        - name: CLAUDE_CONFIG_PATH
+          value: "/home/user/.claude"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /etc/kubeconfig
+          readOnly: true
+      volumes:
+      - name: kubeconfig
+        secret:
+          secretName: discord-claude-kubeconfig
+          optional: true
+      restartPolicy: Always

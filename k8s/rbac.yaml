@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: discord-claude-bot
+  namespace: discord-claude
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: discord-claude-bot
+  namespace: discord-claude
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+rules:
+# Podの管理権限
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Pod execの実行権限
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+
+# Pod logsの読み取り権限
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get", "list"]
+
+# ConfigMapの読み取り権限
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+
+# Secretの読み取り権限
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+
+# Eventの読み取り権限（デバッグ用）
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: discord-claude-bot
+  namespace: discord-claude
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+subjects:
+- kind: ServiceAccount
+  name: discord-claude-bot
+  namespace: discord-claude
+roleRef:
+  kind: Role
+  name: discord-claude-bot
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Namespace管理用のClusterRole（オプション）
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: discord-claude-namespace-manager
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+rules:
+# Namespaceの管理権限
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+  resourceNames: ["discord-claude"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: discord-claude-namespace-manager
+  labels:
+    app: discord-claude-bot
+    component: discord-claude
+subjects:
+- kind: ServiceAccount
+  name: discord-claude-bot
+  namespace: discord-claude
+roleRef:
+  kind: ClusterRole
+  name: discord-claude-namespace-manager
+  apiGroup: rbac.authorization.k8s.io

@@ -369,3 +369,61 @@ func (db *DB) DecrementSandboxUsage() error {
 
 	return nil
 }
+
+// GetUserByID はIDでユーザーを取得する
+func (db *DB) GetUserByID(userID int) (*User, error) {
+	query := `
+		SELECT id, discord_id, username, role, created_at, updated_at
+		FROM users
+		WHERE id = $1
+	`
+	
+	user := &User{}
+	err := db.QueryRow(query, userID).Scan(
+		&user.ID,
+		&user.DiscordID,
+		&user.Username,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return user, nil
+}
+
+// GetSessionByID はIDでセッションを取得する
+func (db *DB) GetSessionByID(sessionID int) (*Session, error) {
+	query := `
+		SELECT id, user_id, thread_id, sandbox_name, status, created_at, updated_at, terminated_at
+		FROM sessions
+		WHERE id = $1
+	`
+	
+	session := &Session{}
+	err := db.QueryRow(query, sessionID).Scan(
+		&session.ID,
+		&session.UserID,
+		&session.ThreadID,
+		&session.SandboxName,
+		&session.Status,
+		&session.CreatedAt,
+		&session.UpdatedAt,
+		&session.TerminatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get session: %w", err)
+	}
+
+	return session, nil
+}

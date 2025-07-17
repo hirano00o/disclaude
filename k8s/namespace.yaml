@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: discord-claude
+  labels:
+    app: discord-claude
+    component: discord-claude
+    environment: production
+
+---
+# NetworkPolicyでサンドボックス間の分離を実現
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: discord-claude-network-policy
+  namespace: discord-claude
+  labels:
+    app: discord-claude
+    component: discord-claude
+spec:
+  podSelector:
+    matchLabels:
+      app: claude-sandbox
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  # Ingressルール: Bot からのみアクセス許可
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: discord-claude-bot
+    ports:
+    - protocol: TCP
+      port: 22
+    - protocol: TCP
+      port: 8080
+
+  # Egressルール: 外部ネットワークアクセス許可、内部サービスは制限
+  egress:
+  # DNS解決を許可
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  
+  # HTTPS/HTTP外部アクセスを許可
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
+  
+  # SSH/Git アクセスを許可
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 22
+
+---
+# ResourceQuotaでリソース使用量を制限
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: discord-claude-quota
+  namespace: discord-claude
+  labels:
+    app: discord-claude
+    component: discord-claude
+spec:
+  hard:
+    # Podの最大数
+    pods: "5"
+    
+    # CPU制限
+    requests.cpu: "2"
+    limits.cpu: "4"
+    
+    # メモリ制限
+    requests.memory: "4Gi"
+    limits.memory: "8Gi"
+    
+    # ストレージ制限
+    requests.storage: "10Gi"
+    
+    # ConfigMap制限
+    configmaps: "10"
+    
+    # Secret制限
+    secrets: "10"
+
+---
+# LimitRangeで個別リソースのデフォルト値を設定
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: discord-claude-limits
+  namespace: discord-claude
+  labels:
+    app: discord-claude
+    component: discord-claude
+spec:
+  limits:
+  # Pod制限
+  - type: Pod
+    max:
+      cpu: "2"
+      memory: "4Gi"
+    min:
+      cpu: "10m"
+      memory: "64Mi"
+  
+  # Container制限
+  - type: Container
+    default:
+      cpu: "100m"
+      memory: "128Mi"
+    defaultRequest:
+      cpu: "50m"
+      memory: "64Mi"
+    max:
+      cpu: "1"
+      memory: "2Gi"
+    min:
+      cpu: "10m"
+      memory: "32Mi"
