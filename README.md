@@ -48,7 +48,7 @@ Discord User → Discord → Discord Bot (Kubernetes) → Claude Code Sandbox (K
 
 - **Kubernetes クラスター**: バージョン 1.25+
 - **PostgreSQL**: バージョン 13+
-- **Go**: バージョン 1.21+
+- **Go**: バージョン 1.24+
 - **Discord Bot Token**: Discord Developer Portalで取得
 
 ### リソース要件
@@ -140,7 +140,7 @@ kubectl apply -f k8s/
 ```bash
 # Dockerfileの作成
 cat <<EOF > Dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
