@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"disclaude/internal/auth"
-	"disclaude/internal/config"
-	"disclaude/internal/db"
-	"disclaude/internal/k8s"
+	"github.com/hirano00o/disclaude/internal/auth"
+	"github.com/hirano00o/disclaude/internal/config"
+	"github.com/hirano00o/disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/k8s"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
@@ -310,21 +310,21 @@ func (b *Bot) sendHelpMessage(s *discordgo.Session, channelID string) {
 	helpMessage := `🤖 **Claude Code Bot - コマンド一覧**
 
 **基本コマンド:**
-• \`/claude start\` - 新しいClaude Codeセッションを開始
-• \`/claude close\` - 現在のセッションを終了
-• \`/claude status\` - 現在のセッション状況を確認
-• \`/claude help\` - このヘルプを表示
+• `+"`/claude start`"+` - 新しいClaude Codeセッションを開始
+• `+"`/claude close`"+` - 現在のセッションを終了
+• `+"`/claude status`"+` - 現在のセッション状況を確認
+• `+"`/claude help`"+` - このヘルプを表示
 
 **オーナー専用コマンド:**
-• \`/claude add user <ユーザーID>\` - ユーザーを追加
-• \`/claude add owner <ユーザーID>\` - ユーザーをオーナーに昇格
-• \`/claude delete user <ユーザーID>\` - ユーザーを削除
-• \`/claude delete owner <ユーザーID>\` - オーナーを一般ユーザーに降格
+• `+"`/claude add user <ユーザーID>`"+` - ユーザーを追加
+• `+"`/claude add owner <ユーザーID>`"+` - ユーザーをオーナーに昇格
+• `+"`/claude delete user <ユーザーID>`"+` - ユーザーを削除
+• `+"`/claude delete owner <ユーザーID>`"+` - オーナーを一般ユーザーに降格
 
 **使用方法:**
-1. \`/claude start\` でスレッドを作成し、Claude Codeセッションを開始
+1. `+"`/claude start`"+` でスレッドを作成し、Claude Codeセッションを開始
 2. スレッド内でClaude Codeと自由に会話
-3. 作業完了後は \`/claude close\` でセッション終了
+3. 作業完了後は `+"`/claude close`"+` でセッション終了
 
 **注意事項:**
 • 同時に作成できるサンドボックスは最大3つまで

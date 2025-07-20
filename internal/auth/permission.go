@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/db"
 )
 
 // PermissionService は権限管理を行うサービス
