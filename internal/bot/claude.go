@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"disclaude/internal/k8s"
+	"github.com/hirano00o/disclaude/internal/k8s"
 
 	"github.com/sirupsen/logrus"
 )

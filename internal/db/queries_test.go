@@ -1,9 +1,7 @@
 package db
 
 import (
-	"database/sql"
 	"testing"
-	"time"
 
 	_ "github.com/lib/pq"
 )

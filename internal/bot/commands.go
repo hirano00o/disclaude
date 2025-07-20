@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/db"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
@@ -89,7 +89,7 @@ func (b *Bot) handleStartCommand(s *discordgo.Session, m *discordgo.MessageCreat
 
 💬 **使用方法:**
 このスレッド内でClaude Codeと自由に会話できます。
-セッション終了時は \`/claude close\` を実行してください。
+セッション終了時は `+"`/claude close`"+` を実行してください。
 
 🔧 **利用可能な機能:**
 • ファイル作成・編集
@@ -184,7 +184,7 @@ func (b *Bot) handleCloseCommand(s *discordgo.Session, m *discordgo.MessageCreat
 このセッションで作成されたファイルやデータはすべて削除されました。
 
 🆕 **新しいセッション:**
-新しいセッションを開始するには \`/claude start\` を実行してください。`,
+新しいセッションを開始するには `+"`/claude start`"+` を実行してください。`,
 		session.ID,
 		session.SandboxName,
 		time.Since(session.CreatedAt).Round(time.Second).String())

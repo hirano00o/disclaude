@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/db"
 )
 
 // TestUserServiceInitializeUser はユーザー初期化のテスト
@@ -43,7 +43,7 @@ func TestUserServiceAddUser(t *testing.T) {
 	service := NewUserService(mockDB)
 
 	// オーナーを作成
-	owner, _ := service.InitializeUser("owner123", "owner", true)
+	_, _ = service.InitializeUser("owner123", "owner", true)
 
 	// 一般ユーザーを追加
 	user, err := service.AddUser("owner123", "user123", "testuser")
@@ -76,8 +76,8 @@ func TestUserServicePromoteToOwner(t *testing.T) {
 	service := NewUserService(mockDB)
 
 	// オーナーと一般ユーザーを作成
-	owner, _ := service.InitializeUser("owner123", "owner", true)
-	user, _ := service.AddUser("owner123", "user123", "testuser")
+	_, _ = service.InitializeUser("owner123", "owner", true)
+	_, _ = service.AddUser("owner123", "user123", "testuser")
 
 	// 一般ユーザーをオーナーに昇格
 	err := service.PromoteToOwner("owner123", "user123")
@@ -106,8 +106,8 @@ func TestUserServiceDemoteFromOwner(t *testing.T) {
 	service := NewUserService(mockDB)
 
 	// 2人のオーナーを作成
-	owner1, _ := service.InitializeUser("owner1", "owner1", true)
-	owner2, _ := service.InitializeUser("owner2", "owner2", true)
+	_, _ = service.InitializeUser("owner1", "owner1", true)
+	_, _ = service.InitializeUser("owner2", "owner2", true)
 
 	// オーナー1がオーナー2を降格
 	err := service.DemoteFromOwner("owner1", "owner2")
@@ -136,8 +136,8 @@ func TestUserServiceRemoveUser(t *testing.T) {
 	service := NewUserService(mockDB)
 
 	// オーナーと一般ユーザーを作成
-	owner, _ := service.InitializeUser("owner123", "owner", true)
-	user, _ := service.AddUser("owner123", "user123", "testuser")
+	_, _ = service.InitializeUser("owner123", "owner", true)
+	_, _ = service.AddUser("owner123", "user123", "testuser")
 
 	// ユーザーを削除
 	err := service.RemoveUser("owner123", "user123")

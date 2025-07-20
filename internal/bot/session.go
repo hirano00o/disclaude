@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/db"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,7 +13,7 @@ import (
 // SessionManager はセッション管理を行う構造体
 type SessionManager struct {
 	db             *db.DB
-	sandboxManager *SandboxManager
+	sandboxManager SandboxManager
 }
 
 // SessionInfo はセッション情報を表す構造体
@@ -26,7 +26,7 @@ type SessionInfo struct {
 }
 
 // NewSessionManager は新しいSessionManagerを作成する
-func NewSessionManager(database *db.DB, sandboxMgr *SandboxManager) *SessionManager {
+func NewSessionManager(database *db.DB, sandboxMgr SandboxManager) *SessionManager {
 	return &SessionManager{
 		db:             database,
 		sandboxManager: sandboxMgr,

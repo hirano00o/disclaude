@@ -4,19 +4,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"net/url"
 	"strings"
 	"time"
 
-	"disclaude/internal/config"
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/config"
+	"github.com/hirano00o/disclaude/internal/db"
 
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
 )
 

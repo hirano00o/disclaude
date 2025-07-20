@@ -3,16 +3,24 @@ package auth
 import (
 	"fmt"
 
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/db"
 )
+
+// UserDatabase はユーザー管理で必要なデータベース操作のインターフェース
+type UserDatabase interface {
+	GetUserByDiscordID(discordID string) (*db.User, error)
+	CreateUser(discordID, username, role string) (*db.User, error)
+	UpdateUserRole(discordID, role string) error
+	DeleteUser(discordID string) error
+}
 
 // UserService はユーザー認証・管理を行うサービス
 type UserService struct {
-	db *db.DB
+	db UserDatabase
 }
 
 // NewUserService は新しいUserServiceを作成する
-func NewUserService(database *db.DB) *UserService {
+func NewUserService(database UserDatabase) *UserService {
 	return &UserService{
 		db: database,
 	}

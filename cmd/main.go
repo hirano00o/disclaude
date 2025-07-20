@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"disclaude/internal/bot"
-	"disclaude/internal/config"
-	"disclaude/internal/db"
+	"github.com/hirano00o/disclaude/internal/bot"
+	"github.com/hirano00o/disclaude/internal/config"
+	"github.com/hirano00o/disclaude/internal/db"
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -32,7 +31,14 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 
 	// データベース接続の初期化
-	database, err := db.NewConnection(cfg.Database)
+	dbConfig := db.DatabaseConfig{
+		Host:     cfg.Database.Host,
+		Port:     cfg.Database.Port,
+		User:     cfg.Database.User,
+		Password: cfg.Database.Password,
+		Database: cfg.Database.Database,
+	}
+	database, err := db.NewConnection(dbConfig)
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to connect to database")
 	}
